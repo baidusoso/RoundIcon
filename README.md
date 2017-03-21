@@ -39,6 +39,7 @@ This parameter will decide transform policy: which part of the original image wo
 
 It will scale both side of the original image to the target size (***param3***), and make round corner without any crop operation.
 The output image for yuanshi.jpg in the root project with policy 0 is 
+
 ![policy 0](https://github.com/baidusoso/RoundIcon/blob/master/icon0.png?raw=true "policy 0")
 
 ***policy 1***
