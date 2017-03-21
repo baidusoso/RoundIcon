@@ -45,16 +45,19 @@ The output image for yuanshi.jpg in the root project with policy 0 is
 
 It will scale the original image with the ratio: the target size(***param3***)/the smaller side size of the original image, crop at the ***top*** of the scaled output image, and make round corner.
 The output image for yuanshi.jpg in the root project with policy 1 is 
+
 ![policy 1](https://github.com/baidusoso/RoundIcon/blob/master/icon1.png?raw=true "policy 1")
 
 ***policy 2***
 
 It will scale the original image with the ratio: the target size(***param3***)/the smaller side size of the original image, crop at the ***center*** of the scaled output image, and make round corner.
 The output image for yuanshi.jpg in the root project with policy 2 is 
+
 ![policy 2](https://github.com/baidusoso/RoundIcon/blob/master/icon2.png?raw=true "policy 2")
 
 ***policy 3***
 
 It will scale the original image with the ratio: the target size(***param3***)/the smaller side size of the original image, crop at the ***bottom*** of the scaled output image, and make round corner.
 The output image for yuanshi.jpg in the root project with policy 3 is 
+
 ![policy 3](https://github.com/baidusoso/RoundIcon/blob/master/icon3.png?raw=true "policy 3")
