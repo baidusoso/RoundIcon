@@ -265,7 +265,9 @@ public class Icon {
         }
         TransformParams params = getTransformParams(image, policy, targetSize);
         BufferedImage outputImage = scaledImage(image, params);
-        outputImage = cropImage(outputImage, params, targetSize);
+        if(policy!=Policy.Scaled){
+            outputImage = cropImage(outputImage, params, targetSize);
+      	}
         outputImage = roundImage(outputImage, targetSize, cornerRadius);
         ImageIO.write(outputImage, "png", new File(targetPath));
         System.out.println("Done");
