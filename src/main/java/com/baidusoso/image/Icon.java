@@ -173,65 +173,6 @@ public class Icon {
         return outputImage;
     }
 
-
-    static void normalRoundImage(String imgUrl, String destFileString, int targetSize, int cornerRadius) throws Exception {
-        InputStream inputStream = getImageInputStreamByUrl(imgUrl);
-        if (inputStream != null) {
-            try {
-                BufferedImage image = ImageIO.read(inputStream);
-                //scale
-                int w = image.getWidth();
-                int h = image.getHeight();
-                float xscale = (float) targetSize / w;
-                float yscale = (float) targetSize / h;
-                float scale = Math.max(xscale, yscale);
-                AffineTransform affineTransform = new AffineTransform();
-                affineTransform.setToScale(scale, scale);
-                AffineTransformOp affineTransformOp = new AffineTransformOp(
-                        affineTransform, null);
-                BufferedImage outputImage = new BufferedImage((int) (w * scale),
-                        (int) (h * scale), BufferedImage.TYPE_INT_ARGB);
-                affineTransformOp.filter(image, outputImage);
-
-                //crop
-                int x = xscale > yscale ? 0 : (int) (w * yscale - targetSize) / 2;
-                int y = xscale < yscale ? 0 : (int) (h * xscale - targetSize) / 2;
-                ImageFilter cropFilter = new CropImageFilter(x, y, targetSize, targetSize);
-                Image img = Toolkit.getDefaultToolkit().createImage(
-                        new FilteredImageSource(outputImage.getSource(), cropFilter));
-                BufferedImage tag = new BufferedImage(targetSize, targetSize,
-                        BufferedImage.TYPE_INT_ARGB);
-
-                Graphics g = tag.getGraphics();
-                g.drawImage(img, 0, 0, null);
-                g.dispose();
-
-                //roundrect
-                BufferedImage output = new BufferedImage(targetSize, targetSize, BufferedImage.TYPE_INT_ARGB);
-                Graphics2D g2 = output.createGraphics();
-                g2.setComposite(AlphaComposite.Src);
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(Color.WHITE);
-                g2.fill(new RoundRectangle2D.Float(0, 0, targetSize, targetSize, cornerRadius, cornerRadius));
-                g2.setComposite(AlphaComposite.SrcAtop);
-                //xscale>yscale?0.0F:(w*yscale-targetSize)/2, xscale<yscale?0.0F:(h*xscale-targetSize)/2
-                g2.drawImage(tag, 0, 0, null);
-                g2.dispose();
-
-                ImageIO.write(output, "png", new File(destFileString));
-            } finally {
-                if (inputStream != null) {
-                    try {
-                        inputStream.close();
-                    } catch (Throwable e) {
-                    }
-                }
-            }
-        } else {
-            System.out.println("Fail to get Image data!!!");
-        }
-    }
-
     static void showUsage() {
         System.out.println("java -jar RoundIcon.jar image [output path] [output image size] [cornerRadius] [policy:0,1,2,3]");
     }
