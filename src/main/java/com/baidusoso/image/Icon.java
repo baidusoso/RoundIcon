@@ -136,7 +136,7 @@ public class Icon {
         }
     }
 
-    static BufferedImage scaledImage(BufferedImage image, TransformParams params) {
+    static BufferedImage scaleImage(BufferedImage image, TransformParams params) {
         AffineTransform affineTransform = new AffineTransform();
         affineTransform.setToScale(params.mXScale, params.mYScale);
         AffineTransformOp affineTransformOp = new AffineTransformOp(
@@ -205,7 +205,7 @@ public class Icon {
             return;
         }
         TransformParams params = getTransformParams(image, policy, targetSize);
-        BufferedImage outputImage = scaledImage(image, params);
+        BufferedImage outputImage = scaleImage(image, params);
         if(policy!=Policy.Scaled){
             outputImage = cropImage(outputImage, params, targetSize);
       	}
