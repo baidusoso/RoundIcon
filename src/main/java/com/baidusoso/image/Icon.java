@@ -18,6 +18,8 @@ import java.awt.image.BufferedImage;
 import java.awt.image.CropImageFilter;
 import java.awt.image.FilteredImageSource;
 import java.awt.image.ImageFilter;
+import java.awt.image.MemoryImageSource;
+import java.awt.image.PixelGrabber;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -147,6 +149,16 @@ public class Icon {
         return outputImage;
     }
 
+    static BufferedImage scaleImage(BufferedImage image, int targetSize) {
+        AffineTransform affineTransform = new AffineTransform();
+        affineTransform.setToScale(targetSize * 1f / image.getWidth(), targetSize * 1f / image.getHeight());
+        AffineTransformOp affineTransformOp = new AffineTransformOp(
+                affineTransform, null);
+        BufferedImage outputImage = new BufferedImage(targetSize, targetSize, BufferedImage.TYPE_INT_ARGB);
+        affineTransformOp.filter(image, outputImage);
+        return outputImage;
+    }
+
     static BufferedImage cropImage(BufferedImage image, TransformParams params, int targetSize) {
         ImageFilter cropFilter = new CropImageFilter(params.mCropAtX, params.mCropAtY, targetSize, targetSize);
         Image img = Toolkit.getDefaultToolkit().createImage(
@@ -173,6 +185,69 @@ public class Icon {
         return outputImage;
     }
 
+    static int[] getPixArray(BufferedImage im) {
+        int w = im.getWidth();
+        int h = im.getHeight();
+        int[] pix = new int[w * h];
+        PixelGrabber pg = null;
+        try {
+            pg = new PixelGrabber(im, 0, 0, w, h, pix, 0, w);
+            if (pg.grabPixels()) {
+                return pix;
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
+
+    static int[] convertImage(int[] ImageSource, int[] backGroundPixArray, int w, int h) {
+        if (backGroundPixArray == null || ImageSource == null) {
+            return null;
+        }
+        for (int i = 0; i < ImageSource.length; i++) {
+            int tmp = i + (i / w + 1) * (100 - w) - (100 - w) / 2;
+            if (((ImageSource[i] & 0xFF000000) != 0) &&
+                    (0xFFFFFFFF != (backGroundPixArray[tmp] & 0xFF000000))) {
+                ImageSource[i] = (ImageSource[i] & 0xFFFFFF | backGroundPixArray[tmp] & 0xFF000000);
+            }
+        }
+        return ImageSource;
+    }
+
+    static BufferedImage circleImage(BufferedImage image, int targetSize) {
+        try {
+            BufferedImage shadowImage = ImageIO.read(Icon.class.getResourceAsStream(
+                    "/resource/shadow.png"));
+            BufferedImage backGroundImage = ImageIO.read(Icon.class.getResourceAsStream(
+                    "/resource/white.png"));
+
+            BufferedImage newImage = scaleImage(image, 90);
+
+            int width = newImage.getWidth();
+            int height = newImage.getHeight();
+
+            int[] backGroundPixArray = getPixArray(backGroundImage);
+            int[] currentPixArray = getPixArray(newImage);
+
+            int[] resultArray = convertImage(currentPixArray, backGroundPixArray, width, height);
+
+            Image pic = Toolkit.getDefaultToolkit().createImage(new MemoryImageSource(width, height,
+                    resultArray, 0, width));
+
+            Graphics2D tmp = shadowImage.createGraphics();
+            tmp.drawImage(backGroundImage, 0, 0, null);
+            tmp.drawImage(pic, 5, 0, null);
+            tmp.dispose();
+
+            return scaleImage(shadowImage,targetSize);
+        } catch (IOException ex) {
+            System.out.println("error");
+        }
+        return null;
+    }
+
+
     static void showUsage() {
         System.out.println("java -jar RoundIcon.jar image [output path] [output image size] [cornerRadius] [policy:0,1,2,3]");
     }
@@ -191,7 +266,7 @@ public class Icon {
         if (args.length >= 3) {
             targetSize = Integer.parseInt(args[2]);
         }
-        int cornerRadius = 20;
+        int cornerRadius = 0;
         if (args.length >= 4) {
             cornerRadius = Integer.parseInt(args[3]);
         }
@@ -206,10 +281,14 @@ public class Icon {
         }
         TransformParams params = getTransformParams(image, policy, targetSize);
         BufferedImage outputImage = scaleImage(image, params);
-        if(policy!=Policy.Scaled){
+        if (policy != Policy.Scaled) {
             outputImage = cropImage(outputImage, params, targetSize);
-      	}
-        outputImage = roundImage(outputImage, targetSize, cornerRadius);
+        }
+        if (cornerRadius == 0) {
+            outputImage = circleImage(outputImage, targetSize);
+        } else {
+            outputImage = roundImage(outputImage, targetSize, cornerRadius);
+        }
         ImageIO.write(outputImage, "png", new File(targetPath));
         System.out.println("Done");
     }
