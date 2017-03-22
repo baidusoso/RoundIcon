@@ -29,7 +29,7 @@ The width or height of the target round icon, default value is ***96***.
 
 **param4**
 
-The corner radius of the target round icon, default value is ***20***.
+The corner radius of the target round icon, default value is ***0***. If corner radiu great than 0, it will output circle image with shadow, otherwise, it will output round rect image.
 
 **param5**
 
