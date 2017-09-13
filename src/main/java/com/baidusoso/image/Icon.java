@@ -57,12 +57,12 @@ public class Icon {
         }
     }
 
-    static class TransformParams {
+    private static class TransformParams {
         float mXScale, mYScale;
         int mCropAtX, mCropAtY;
     }
 
-    static TransformParams getTransformParams(BufferedImage image, Policy policy, int targetSize) {
+    private static TransformParams getTransformParams(BufferedImage image, Policy policy, int targetSize) {
         if (image == null || policy == null) {
             throw new NullPointerException("Empty image or policy!!! ");
         }
@@ -91,7 +91,7 @@ public class Icon {
         return params;
     }
 
-    static InputStream getImageInputStreamByUrl(String url) {
+    private static InputStream getImageInputStreamByUrl(String url) {
         URL imgUrl = null;
         try {
             imgUrl = new URL(url);
@@ -107,7 +107,7 @@ public class Icon {
         return null;
     }
 
-    static InputStream getImageInputStreamByFilePath(String filePath) {
+    private static InputStream getImageInputStreamByFilePath(String filePath) {
         try {
             return new FileInputStream(filePath);
         } catch (IOException e) {
@@ -116,7 +116,7 @@ public class Icon {
         return null;
     }
 
-    static BufferedImage getImage(String uri) throws IOException {
+    private static BufferedImage getImage(String uri) throws IOException {
         if (uri == null) {
             throw new NullPointerException("uri is null!!!");
         }
@@ -138,7 +138,7 @@ public class Icon {
         }
     }
 
-    static BufferedImage scaleImage(BufferedImage image, TransformParams params) {
+    private static BufferedImage scaleImage(BufferedImage image, TransformParams params) {
         AffineTransform affineTransform = new AffineTransform();
         affineTransform.setToScale(params.mXScale, params.mYScale);
         AffineTransformOp affineTransformOp = new AffineTransformOp(
@@ -149,7 +149,7 @@ public class Icon {
         return outputImage;
     }
 
-    static BufferedImage scaleImage(BufferedImage image, int targetSize) {
+    private static BufferedImage scaleImage(BufferedImage image, int targetSize) {
         AffineTransform affineTransform = new AffineTransform();
         affineTransform.setToScale(targetSize * 1f / image.getWidth(), targetSize * 1f / image.getHeight());
         AffineTransformOp affineTransformOp = new AffineTransformOp(
@@ -159,7 +159,7 @@ public class Icon {
         return outputImage;
     }
 
-    static BufferedImage cropImage(BufferedImage image, TransformParams params, int targetSize) {
+    private static BufferedImage cropImage(BufferedImage image, TransformParams params, int targetSize) {
         ImageFilter cropFilter = new CropImageFilter(params.mCropAtX, params.mCropAtY, targetSize, targetSize);
         Image img = Toolkit.getDefaultToolkit().createImage(
                 new FilteredImageSource(image.getSource(), cropFilter));
@@ -172,7 +172,7 @@ public class Icon {
         return outputImage;
     }
 
-    static BufferedImage roundImage(BufferedImage image, int targetSize, int cornerRadius) {
+    private static BufferedImage roundImage(BufferedImage image, int targetSize, int cornerRadius) {
         BufferedImage outputImage = new BufferedImage(targetSize, targetSize, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2 = outputImage.createGraphics();
         g2.setComposite(AlphaComposite.Src);
@@ -185,7 +185,7 @@ public class Icon {
         return outputImage;
     }
 
-    static int[] getPixArray(BufferedImage im) {
+    private static int[] getPixArray(BufferedImage im) {
         int w = im.getWidth();
         int h = im.getHeight();
         int[] pix = new int[w * h];
@@ -201,7 +201,7 @@ public class Icon {
         return null;
     }
 
-    static int[] convertImage(int[] ImageSource, int[] backGroundPixArray, int w, int h) {
+    private static int[] convertImage(int[] ImageSource, int[] backGroundPixArray, int w, int h) {
         if (backGroundPixArray == null || ImageSource == null) {
             return null;
         }
@@ -215,7 +215,7 @@ public class Icon {
         return ImageSource;
     }
 
-    static BufferedImage circleImage(BufferedImage image, int targetSize) {
+    private static BufferedImage circleImage(BufferedImage image, int targetSize) {
         try {
             BufferedImage shadowImage = ImageIO.read(Icon.class.getResourceAsStream(
                     "/resource/shadow.png"));
@@ -247,7 +247,7 @@ public class Icon {
         return null;
     }
 
-    static BufferedImage addPaddingToImage(BufferedImage image, int padding) {
+    private static BufferedImage addPaddingToImage(BufferedImage image, int padding) {
         int fullSize = image.getWidth();
         int viewSize = fullSize - 2 * padding;
         float scale = viewSize * 1f / fullSize;
@@ -261,9 +261,61 @@ public class Icon {
         return outputImage;
     }
 
-
-    static void showUsage() {
+    private static void showUsage() {
         System.out.println("java -jar RoundIcon.jar image [output path] [output image size] [cornerRadius] [policy:0,1,2,3] [padding]");
+    }
+
+    /**
+     * {@link #generateIcon(String, String, int, int, Policy, int)} with policy = Policy.Scaled
+     */
+    public static boolean generateIcon(String inputPath, String outputPath, int iconSize, int cornerRadius, int padding) {
+        return generateIcon(inputPath, outputPath, iconSize, cornerRadius, Policy.Scaled, padding);
+    }
+
+    /**
+     * Generate icon from base by parameters
+     * @param inputPath source image, it could be a local image path or http url
+     * @param targetPath path for the output icon
+     * @param targetSize width or height of the output icon
+     * @param cornerRadius corner radius, if corner radius greater than 0, it will output round rect image, otherwise,
+     *                     it will output circle image with shadow .
+     * @param policy parameter will decide transform policy: which part of the original image would be transform to the round icon.
+     *               Its value should be 0, 1 ,2, or 3. .
+     * @param padding padding for the output icon
+     * @return true - if icon was generated, false - otherwise
+     */
+    public static boolean generateIcon(String inputPath, String targetPath, int targetSize, int cornerRadius, Policy policy, int padding) {
+        BufferedImage image = null;
+        try {
+            image = getImage(inputPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (image == null) {
+            System.out.println("Fail to get Image data!!!");
+            return false;
+        }
+        TransformParams params = getTransformParams(image, policy, targetSize);
+        BufferedImage outputImage = scaleImage(image, params);
+        if (policy != Policy.Scaled) {
+            outputImage = cropImage(outputImage, params, targetSize);
+        }
+        if (cornerRadius == 0) {
+            outputImage = circleImage(outputImage, targetSize);
+        } else {
+            outputImage = roundImage(outputImage, targetSize, cornerRadius);
+        }
+        if (padding > 0) {
+            outputImage = addPaddingToImage(outputImage, padding);
+        }
+        try {
+            ImageIO.write(outputImage, "png", new File(targetPath));
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+        System.out.println("Done");
+        return true;
     }
 
     public static void main(String[] args) throws Exception {
@@ -292,25 +344,7 @@ public class Icon {
         if (args.length >= 6) {
             padding = Integer.parseInt(args[5]);
         }
-        BufferedImage image = getImage(uri);
-        if (image == null) {
-            System.out.println("Fail to get Image data!!!");
-            return;
-        }
-        TransformParams params = getTransformParams(image, policy, targetSize);
-        BufferedImage outputImage = scaleImage(image, params);
-        if (policy != Policy.Scaled) {
-            outputImage = cropImage(outputImage, params, targetSize);
-        }
-        if (cornerRadius == 0) {
-            outputImage = circleImage(outputImage, targetSize);
-        } else {
-            outputImage = roundImage(outputImage, targetSize, cornerRadius);
-        }
-        if (padding > 0) {
-            outputImage = addPaddingToImage(outputImage, padding);
-        }
-        ImageIO.write(outputImage, "png", new File(targetPath));
-        System.out.println("Done");
+
+        generateIcon(uri, targetPath, targetSize, cornerRadius, policy, padding);
     }
 }
