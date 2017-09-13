@@ -247,9 +247,23 @@ public class Icon {
         return null;
     }
 
+    static BufferedImage addPaddingToImage(BufferedImage image, int padding) {
+        int fullSize = image.getWidth();
+        int viewSize = fullSize - 2 * padding;
+        float scale = viewSize * 1f / fullSize;
+        AffineTransform affineTransform = new AffineTransform();
+        affineTransform.setToScale(scale, scale);
+        affineTransform.translate(padding / scale, padding / scale);
+        AffineTransformOp affineTransformOp = new AffineTransformOp(
+                affineTransform, null);
+        BufferedImage outputImage = new BufferedImage(fullSize, fullSize, BufferedImage.TYPE_INT_ARGB);
+        affineTransformOp.filter(image, outputImage);
+        return outputImage;
+    }
+
 
     static void showUsage() {
-        System.out.println("java -jar RoundIcon.jar image [output path] [output image size] [cornerRadius] [policy:0,1,2,3]");
+        System.out.println("java -jar RoundIcon.jar image [output path] [output image size] [cornerRadius] [policy:0,1,2,3] [padding]");
     }
 
     public static void main(String[] args) throws Exception {
@@ -274,6 +288,10 @@ public class Icon {
         if (args.length >= 5) {
             policy = Policy.valueOf(Integer.parseInt(args[4]));
         }
+        int padding = 0;
+        if (args.length >= 6) {
+            padding = Integer.parseInt(args[5]);
+        }
         BufferedImage image = getImage(uri);
         if (image == null) {
             System.out.println("Fail to get Image data!!!");
@@ -288,6 +306,9 @@ public class Icon {
             outputImage = circleImage(outputImage, targetSize);
         } else {
             outputImage = roundImage(outputImage, targetSize, cornerRadius);
+        }
+        if (padding > 0) {
+            outputImage = addPaddingToImage(outputImage, padding);
         }
         ImageIO.write(outputImage, "png", new File(targetPath));
         System.out.println("Done");
