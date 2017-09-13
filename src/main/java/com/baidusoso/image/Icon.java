@@ -35,6 +35,8 @@ import static com.baidusoso.image.Icon.Policy.CropAtTop;
 
 public class Icon {
 
+    public static boolean ENABLE_LOGS = true;
+
     enum Policy {
         Scaled(0), CropAtTop(1), CropAtCenter(2), CropAtBottom(3);
         int value;
@@ -242,7 +244,7 @@ public class Icon {
 
             return scaleImage(shadowImage,targetSize);
         } catch (IOException ex) {
-            System.out.println("error");
+            if (ENABLE_LOGS) System.out.println("error");
         }
         return null;
     }
@@ -292,7 +294,7 @@ public class Icon {
             e.printStackTrace();
         }
         if (image == null) {
-            System.out.println("Fail to get Image data!!!");
+            if (ENABLE_LOGS) System.out.println("Fail to get Image data!!!");
             return false;
         }
         TransformParams params = getTransformParams(image, policy, targetSize);
@@ -314,7 +316,7 @@ public class Icon {
             e.printStackTrace();
             return false;
         }
-        System.out.println("Done");
+        if (ENABLE_LOGS) System.out.println("Done");
         return true;
     }
 
