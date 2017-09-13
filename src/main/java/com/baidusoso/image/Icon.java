@@ -142,7 +142,7 @@ public class Icon {
         AffineTransform affineTransform = new AffineTransform();
         affineTransform.setToScale(params.mXScale, params.mYScale);
         AffineTransformOp affineTransformOp = new AffineTransformOp(
-                affineTransform, null);
+                affineTransform, AffineTransformOp.TYPE_BICUBIC);
         BufferedImage outputImage = new BufferedImage((int) (image.getWidth() * params.mXScale),
                 (int) (image.getHeight() * params.mYScale), BufferedImage.TYPE_INT_ARGB);
         affineTransformOp.filter(image, outputImage);
@@ -153,7 +153,7 @@ public class Icon {
         AffineTransform affineTransform = new AffineTransform();
         affineTransform.setToScale(targetSize * 1f / image.getWidth(), targetSize * 1f / image.getHeight());
         AffineTransformOp affineTransformOp = new AffineTransformOp(
-                affineTransform, null);
+                affineTransform, AffineTransformOp.TYPE_BICUBIC);
         BufferedImage outputImage = new BufferedImage(targetSize, targetSize, BufferedImage.TYPE_INT_ARGB);
         affineTransformOp.filter(image, outputImage);
         return outputImage;
@@ -255,7 +255,7 @@ public class Icon {
         affineTransform.setToScale(scale, scale);
         affineTransform.translate(padding / scale, padding / scale);
         AffineTransformOp affineTransformOp = new AffineTransformOp(
-                affineTransform, null);
+                affineTransform, AffineTransformOp.TYPE_BICUBIC);
         BufferedImage outputImage = new BufferedImage(fullSize, fullSize, BufferedImage.TYPE_INT_ARGB);
         affineTransformOp.filter(image, outputImage);
         return outputImage;
