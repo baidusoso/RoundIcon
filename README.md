@@ -29,7 +29,7 @@ The width or height of the target round icon, default value is ***96***.
 
 **param4**
 
-The corner radius of the target round icon, default value is ***0***. If corner radiu great than 0, it will output circle image with shadow, otherwise, it will output round rect image.
+The corner radius of the target round icon, default value is ***0***. If corner radius greater than 0, it will output round rect image, otherwise, it will output circle image with shadow.
 
 **param5**
 
@@ -62,3 +62,7 @@ It will scale the original image with the ratio: the target size(***param3***)/t
 The output image for yuanshi.jpg in the root project with policy 3 is 
 
 ![policy 3](https://github.com/baidusoso/RoundIcon/blob/master/icon3.png?raw=true "policy 3")
+
+**param6**
+
+Padding for the output icon, default is 0.
